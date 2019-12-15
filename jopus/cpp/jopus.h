@@ -28,7 +28,7 @@ struct OpusAudio {
   std::string vendor;
 };
 
-const char *ERR2STR(int err) {
+std::string ERR2STR(int err) {
   switch (err) {
     case OP_FALSE:
       return "A request did not succeed.";
@@ -71,8 +71,7 @@ const char *ERR2STR(int err) {
       return "The first or last granule position of a link failed basic "
              "validity checks.";
     default:
-      std::string error_msg = "Unknown error: " + std::to_string(err);
-      return error_msg.c_str();
+      return "Unknown error: " + std::to_string(err);
   }
 }
 

@@ -13,7 +13,6 @@ extensions = [
             "/usr/local/include/opus",
             "/usr/local/include",
         ],
-        extra_compile_args=["-std=c++14"],
         language="c++",
     )
 ]
@@ -27,6 +26,7 @@ setup(
     python_requires=">=3.6.0",
     author="Dmitry Yutkin",
     license="MIT",
+    zip_safe=True,
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
