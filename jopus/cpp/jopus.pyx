@@ -1,6 +1,5 @@
 # cython: language_level=3
-
-from typing import List
+import numpy as np
 
 from jopus_decl cimport (
     OpusAudio as c_OpusAudio,
@@ -8,16 +7,34 @@ from jopus_decl cimport (
     openOpusFile as c_openOpusFile,
 )
 
-cdef class OpusAudio:
-    __slots__ = ["info"]
+class OpusAudio:
 
-    cdef c_OpusAudio info
-
-    def __init__(self, const c_OpusAudio& info):
-        self.info = info
+    def __init__(
+            self,
+            samples,
+            input_sample_rate,
+            output_gain,
+            mapping_family,
+            size_in_bytes,
+            duration,
+            num_streams,
+            pre_skip,
+            channel_count,
+            vendor,
+    ):
+        self.samples = samples
+        self.input_sample_rate = input_sample_rate
+        self.output_gain = output_gain
+        self.mapping_family = mapping_family
+        self.size_in_bytes = size_in_bytes
+        self.duration = duration
+        self.num_streams = num_streams
+        self.pre_skip = pre_skip
+        self.channel_count = channel_count
+        self.vendor = vendor
 
     def __repr__(self):
-        return f"<OpusAudioInfo({hex(id(self))}): " \
+        return f"<OpusAudio({hex(id(self))}): " \
                f"sample_rate: {self.input_sample_rate}, " \
                f"duration: {self.duration}, " \
                f"streams: {self.num_streams}, " \
@@ -25,45 +42,23 @@ cdef class OpusAudio:
                f"size_in_bytes: {self.size_in_bytes}, " \
                f"vendor: {self.vendor}>"
 
-    @property
-    def output_gain(self) -> int:
-        return self.info.outputGain
 
-    @property
-    def mapping_family(self) -> int:
-        return self.info.mappingFamily
+def open_file(filepath):
+    cdef c_OpusAudio res = c_openOpusFile(filepath.encode())
+    cdef float[:] mw = <float[:res.samples.size()]>res.samples.data()
 
-    @property
-    def samples(self) -> List[float]:
-        return self.info.samples
-
-    @property
-    def size_in_bytes(self) -> int:
-        return self.info.sizeInBytes
-
-    @property
-    def duration(self) -> float:
-        return self.info.duration
-
-    @property
-    def num_streams(self) -> int:
-        return self.info.streamCount
-
-    @property
-    def input_sample_rate(self) -> int:
-        return self.info.inputSampleRate
-
-    @property
-    def pre_skip(self) -> int:
-        return self.info.preSkip
-
-    @property
-    def channel_count(self) -> int:
-        return self.info.channelCount
-
-    @property
-    def vendor(self) -> str:
-        return self.info.vendor.decode()
+    return OpusAudio(
+        np.asarray(mw),
+        res.inputSampleRate,
+        res.outputGain,
+        res.mappingFamily,
+        res.sizeInBytes,
+        res.duration,
+        res.streamCount,
+        res.preSkip,
+        res.channelCount,
+        res.vendor.decode(),
+    )
 
 def open_url(
         url: str,
@@ -73,8 +68,17 @@ def open_url(
 ) -> OpusAudio:
     cdef c_OpusAudio res = c_openOpusFileByUrl(
         url.encode(), proxy_host.encode(), proxy_port, skip_ssl_cert_check)
-    return OpusAudio(res)
+    cdef float[:] mw = <float[:res.samples.size()]>res.samples.data()
 
-def open_file(filepath: str) -> OpusAudio:
-    cdef c_OpusAudio res = c_openOpusFile(filepath.encode())
-    return OpusAudio(res)
+    return OpusAudio(
+        np.asarray(mw),
+        res.inputSampleRate,
+        res.outputGain,
+        res.mappingFamily,
+        res.sizeInBytes,
+        res.duration,
+        res.streamCount,
+        res.preSkip,
+        res.channelCount,
+        res.vendor.decode(),
+    )

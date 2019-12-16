@@ -27,6 +27,7 @@ setup(
     author="Dmitry Yutkin",
     license="MIT",
     zip_safe=True,
+    install_requires=["numpy"],  # Any version of numpy is OK
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
