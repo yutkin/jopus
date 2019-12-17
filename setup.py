@@ -5,7 +5,7 @@ from Cython.Build import cythonize
 extensions = [
     Extension(
         name="_jopus_cython",
-        sources=["jopus/cpp/jopus.pyx"],
+        sources=["jopus/jopus.pyx"],
         libraries=["opusfile", "opus", "ogg", "opusurl"],
         library_dirs=["/usr/local/lib"],
         include_dirs=[
@@ -25,6 +25,7 @@ setup(
     ext_modules=cythonize(extensions, force=True),
     python_requires=">=3.6.0",
     author="Dmitry Yutkin",
+    url='https://github.com/yutkin/jopus',
     license="MIT",
     zip_safe=True,
     install_requires=["numpy"],  # Any version of numpy is OK

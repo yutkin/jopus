@@ -1,7 +1,7 @@
 # cython: language_level=3
 import numpy as np
 
-from jopus_decl cimport (
+from jopus.jopus_decl cimport (
     OpusAudio as c_OpusAudio,
     openOpusFileByUrl as c_openOpusFileByUrl,
     openOpusFile as c_openOpusFile,
