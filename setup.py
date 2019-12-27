@@ -1,6 +1,10 @@
 from setuptools import Extension, find_packages, setup
 
 from Cython.Build import cythonize
+from Cython.Compiler import Options
+
+
+Options.warning_errors = True
 
 extensions = [
     Extension(
@@ -19,7 +23,7 @@ extensions = [
 
 setup(
     name="jopus",
-    version="0.0.1",
+    version="0.0.2",
     packages=find_packages(),
     description="Simple Python wrapper for libopusfile",
     ext_modules=cythonize(extensions, force=True),
