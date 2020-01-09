@@ -1,4 +1,5 @@
 from setuptools import Extension, find_packages, setup
+import numpy
 
 from Cython.Build import cythonize
 from Cython.Compiler import Options
@@ -16,6 +17,7 @@ extensions = [
             "/usr/include/opus",
             "/usr/local/include/opus",
             "/usr/local/include",
+            numpy.get_include(),
         ],
         language="c++",
     )

@@ -1,11 +1,45 @@
 # cython: language_level=3
 import numpy as np
+cimport numpy as np
 
 from jopus.jopus_decl cimport (
     OpusAudio as c_OpusAudio,
     openOpusFileByUrl as c_openOpusFileByUrl,
     openOpusFile as c_openOpusFile,
 )
+
+from libcpp.vector cimport vector
+
+cdef extern from "<utility>" namespace "std" nogil:
+  T move[T](T)
+
+cdef class ArrayWrapper:
+    cdef vector[float] vec
+    cdef Py_ssize_t shape[1]
+    cdef Py_ssize_t strides[1]
+
+    cdef set_data(self, vector[float]& data):
+       self.vec = move(data)
+
+    def __getbuffer__(self, Py_buffer *buffer, int flags):
+        cdef Py_ssize_t itemsize = sizeof(self.vec[0])
+
+        self.shape[0] = self.vec.size()
+        self.strides[0] = sizeof(float)
+        buffer.buf = <char *>&(self.vec[0])
+        buffer.format = 'f'
+        buffer.internal = NULL
+        buffer.itemsize = itemsize
+        buffer.len = self.vec.size() * itemsize
+        buffer.ndim = 1
+        buffer.obj = self
+        buffer.readonly = 0
+        buffer.shape = self.shape
+        buffer.strides = self.strides
+        buffer.suboffsets = NULL
+
+    def __releasebuffer__(self, Py_buffer *buffer):
+        pass
 
 class OpusAudio:
 
@@ -43,12 +77,15 @@ class OpusAudio:
                f"vendor: {self.vendor}>"
 
 
-def open_file(filepath):
+def open_file(filepath) -> OpusAudio:
     cdef c_OpusAudio res = c_openOpusFile(filepath.encode())
-    cdef float[:] mw = <float[:res.samples.size()]>res.samples.data()
+    w = ArrayWrapper()
+    w.set_data(res.samples)
+    arr = np.asarray(w)
+    arr.setflags(write=0)
 
     return OpusAudio(
-        np.asarray(mw),
+        arr,
         res.inputSampleRate,
         res.outputGain,
         res.mappingFamily,
@@ -68,10 +105,14 @@ def open_url(
 ) -> OpusAudio:
     cdef c_OpusAudio res = c_openOpusFileByUrl(
         url.encode(), proxy_host.encode(), proxy_port, skip_ssl_cert_check)
-    cdef float[:] mw = <float[:res.samples.size()]>res.samples.data()
+
+    w = ArrayWrapper()
+    w.set_data(res.samples)
+    arr = np.asarray(w)
+    arr.setflags(write=0)
 
     return OpusAudio(
-        np.asarray(mw),
+        arr,
         res.inputSampleRate,
         res.outputGain,
         res.mappingFamily,
