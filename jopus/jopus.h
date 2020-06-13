@@ -109,7 +109,7 @@ int __decode(OggOpusFile *of, OpusAudio *info) {
     buffSize = std::min(static_cast<int>(info->samples.size() - offset), buffSize);
     ret = op_read_float(of, info->samples.data() + offset, buffSize, NULL);
     if (ret == OP_HOLE) {
-      std::cerr << "Hole detected. Corrupt file segment?" << std::endl;
+      // Hole detected, skip it
       continue;
     }
 
