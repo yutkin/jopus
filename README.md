@@ -1,5 +1,5 @@
 # Jopus
-Simple, fast and efficient Python wrapper for libopusfile.
+Simple, fast, and efficient wrapper for libopusfile which allows you easily read `.ogg` files from Python.
 
 # Installation
 ## Requirements
